@@ -1,0 +1,8 @@
+releases:
+  - name: my-app
+    chart: ./chart
+    values:
+      - values/{{ .Environment.Name }}/values.yaml
+      - values/{{ .Environment.Name }}/secrets.yaml
+    environment: dev
+

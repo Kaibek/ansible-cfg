@@ -1,0 +1,37 @@
+replicaCount: 2
+image:
+  repository: kaibek/myim
+  tag: 1
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 8000
+  nodePort: 30080
+
+ingress:
+  enabled: true
+  paths:
+    - path: /
+      pathType: Prefix
+  annotations: {}
+  hosts:
+    dev: localhost
+    stage: farforstaging.ru
+    prod: farfor.ru
+
+certManager:
+  enabled: true
+  issuer: acme-letsencrypt
+  acmeHttp01Ingress: true
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+environment: dev
+
+secret:
+  environmentFromSecret: "my-app-secret"
