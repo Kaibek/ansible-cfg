@@ -1,0 +1,22 @@
+---
+- name: Disable IPv6 by editing /etc/sysctl.conf
+  hosts: nginx_server
+  become: true
+  tasks:
+    - name: Add IPv6 disabling settings to /etc/sysctl.conf
+      ansible.builtin.blockinfile:
+        path: /etc/sysctl.conf
+        block: |
+          net.ipv6.conf.all.disable_ipv6 = 1
+          net.ipv6.conf.default.disable_ipv6 = 1
+          net.ipv6.conf.lo.disable_ipv6 = 1
+        create: yes  # Этот параметр добавляет файл, если его не существует
+
+- name: Apply sysctl changes
+  hosts: nginx_server
+  become: true
+  tasks:
+    - name: Reload sysctl settings
+      ansible.builtin.command:
+        cmd: sysctl -p
+

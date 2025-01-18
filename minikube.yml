@@ -1,0 +1,29 @@
+---
+- name: Kubernetes
+  hosts: nginx_server
+  become: true
+
+  tasks:
+
+    - name: Install Minikube
+      ansible.builtin.shell:
+        cmd: |
+          sudo curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+#    - name: Install Docker
+#      ansible.builtin.shell: sudo apt install -y docker.io && sudo apt install docker-ce
+
+    - name: Run Minikube and check status
+      ansible.builtin.shell: sudo -u bekzh1 minikube start --driver=docker
+      args:
+        executable: /bin/bash
+
+    - name: Install kubectl
+      ansible.builtin.shell:
+        cmd: |
+          sudo curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+
+

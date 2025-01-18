@@ -1,0 +1,64 @@
+- name: Clone repository and setup dependencies
+  hosts: nginx_server
+  become: true
+  tasks:
+
+    - name: Clone repository from GitHub
+      ansible.builtin.git:
+        repo: 'https://github.com/smenateam/assignments.git'
+        dest: '/home/bekzh1/assignments'
+        accept_hostkey: yes
+
+    - name: Install required tools and add Deadsnakes PPA for Python 3.9
+      block:
+        - name: Install software-properties-common
+          ansible.builtin.shell: sudo apt install software-properties-common -y && sudo add-apt-repository -y ppa:deadsnakes/ppa
+
+    - name: Install Python 3.9 and required packages
+      block:
+        - name: Install Python 3.9 and additional tools
+          ansible.builtin.shell: sudo apt install python3.9 -y && sudo apt install -y python3.9-venv
+
+        - name: Set Python 3.9 as the default
+          ansible.builtin.shell: sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
+    - name: Create virtual environment directory
+      ansible.builtin.shell: sudo mkdir -p fvds
+      args:
+            chdir: /home/bekzh1/assignments/devops
+
+    - name: Create virtual environment fvds_env
+      ansible.builtin.shell: sudo python3.9 -m venv fvds_env
+      args:
+            chdir: /home/bekzh1/assignments/devops/fvds
+            executable: /bin/bash
+
+    - name: Activate the virtual environment and ensure correct ownership
+      block:
+        - name: Activate virtual environment
+          ansible.builtin.shell: source /home/bekzh1/assignments/devops/fvds/fvds_env/bin/activate
+          args:
+               chdir: /home/bekzh1/assignments/devops
+               executable: /bin/bash
+
+        - name: Set ownership of the project directory
+          ansible.builtin.shell: sudo chown -R bekzh1:bekzh1 /home/bekzh1/assignments/devops
+
+    - name: Download and install Poetry globally
+      ansible.builtin.shell: sudo curl -sSL https://install.python-poetry.org | python3.9 -
+
+    - name: Add Poetry to PATH in .bashrc
+      ansible.builtin.lineinfile:
+        path: /home/bekzh1/.bashrc
+        line: 'export PATH="/home/bekzh1/assignments/devops:$PATH"'
+        create: yes
+      become_user: bekzh1
+
+    - name: Source .bashrc to update PATH
+      ansible.builtin.shell: source /home/bekzh1/.bashrc
+      args:
+        executable: /bin/bash
+      become_user: bekzh1
+
+
+
